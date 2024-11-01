@@ -2,6 +2,7 @@ import { Key, Suspense } from "react";
 import CabinList from "../_components/CabinList";
 import Spinner from "../_components/Spinner";
 import Filter from "../_components/Filter";
+import ReservationReminder from "../_components/ReservationReminder";
 
 // invalidate every hour
 // updated: not relevant anymore after using searchParams
@@ -38,6 +39,7 @@ export default async function Page({
 
       <Suspense fallback={<Spinner />} key={capacity as Key}>
         <CabinList filter={capacity} />
+        <ReservationReminder />
       </Suspense>
     </div>
   );
