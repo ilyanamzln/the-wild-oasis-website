@@ -1,15 +1,23 @@
-import { Suspense } from "react";
+import { Key, Suspense } from "react";
 import CabinList from "../_components/CabinList";
 import Spinner from "../_components/Spinner";
+import Filter from "../_components/Filter";
 
 // invalidate every hour
+// updated: not relevant anymore after using searchParams
 export const revalidate = 3600;
 
 export const metadata = {
   title: "Cabins",
 };
 
-export default function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) {
+  const { capacity = "all" } = await searchParams;
+
   return (
     <div>
       <h1 className="mb-5 text-4xl font-medium text-accent-400">
@@ -24,8 +32,12 @@ export default function Page() {
         Welcome to paradise.
       </p>
 
-      <Suspense fallback={<Spinner />}>
-        <CabinList />
+      <div className="mb-8 flex justify-end">
+        <Filter />
+      </div>
+
+      <Suspense fallback={<Spinner />} key={capacity as Key}>
+        <CabinList filter={capacity} />
       </Suspense>
     </div>
   );
