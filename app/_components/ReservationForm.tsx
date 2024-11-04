@@ -1,8 +1,15 @@
 "use client";
 
+import { User } from "next-auth";
 import { Tables } from "../_lib/database.types";
 
-function ReservationForm({ cabin }: { cabin: Tables<"cabins"> }) {
+function ReservationForm({
+  cabin,
+  user,
+}: {
+  cabin: Tables<"cabins">;
+  user: User;
+}) {
   const { max_capacity: maxCapacity } = cabin;
 
   return (
@@ -10,16 +17,16 @@ function ReservationForm({ cabin }: { cabin: Tables<"cabins"> }) {
       <div className="flex items-center justify-between bg-primary-800 px-16 py-2 text-primary-300">
         <p>Logged in as</p>
 
-        {/* <div className='flex gap-4 items-center'>
+        <div className="flex items-center gap-4">
           <img
             // Important to display google profile images
-            referrerPolicy='no-referrer'
-            className='h-8 rounded-full'
-            src={user.image}
-            alt={user.name}
+            referrerPolicy="no-referrer"
+            className="h-8 rounded-full"
+            src={user?.image || undefined}
+            alt={user?.name || "User Avatar"}
           />
           <p>{user.name}</p>
-        </div> */}
+        </div>
       </div>
 
       <form className="flex flex-col gap-5 bg-primary-900 px-16 py-10 text-lg">

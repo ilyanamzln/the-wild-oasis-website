@@ -155,7 +155,10 @@ export async function getCountries() {
 /////////////
 // CREATE
 
-export async function createGuest(newGuest: Tables<"guests">) {
+export async function createGuest(newGuest: {
+  email: string;
+  full_name: string;
+}) {
   const { data, error } = await supabase.from("guests").insert([newGuest]);
 
   if (error) {
