@@ -1,6 +1,6 @@
 import SignInButton from "../_components/SignInButton";
 
-export const metadeta = {
+export const metadata = {
   title: "Login",
 };
 
