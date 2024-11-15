@@ -80,15 +80,15 @@ export async function getBooking(id: string) {
   return data;
 }
 
-export async function getBookings(guestId: string) {
+export async function getBookings(guestId: number) {
   const { data, error, count } = await supabase
     .from("bookings")
     // We actually also need data on the cabins as well. But let's ONLY take the data that we actually need, in order to reduce downloaded data.
     .select(
       "id, created_at, start_date, end_date, num_nights, num_guests, total_price, guest_id, cabin_id, cabins(name, image)",
     )
-    .eq("guestId", guestId)
-    .order("startDate")
+    .eq("guest_id", guestId)
+    .order("start_date")
     .returns<BookingsPick[]>();
 
   if (error) {

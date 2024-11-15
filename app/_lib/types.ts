@@ -1,29 +1,29 @@
 export interface CabinPick {
   id: number;
-  name: string | null;
-  max_capacity: number | null;
-  regular_price: number | null;
-  discount: number | null;
-  image: string | null;
+  name: string;
+  max_capacity: number;
+  regular_price: number;
+  discount: number;
+  image: string;
 }
 
 export interface CabinPrice {
-  regular_price: number | null;
-  discount: number | null;
+  regular_price: number;
+  discount: number;
 }
 
 export interface BookingsPick {
   id: number;
   created_at: string;
-  start_date: string | null;
-  end_date: string | null;
-  num_nights: number | null;
-  num_guests: number | null;
-  total_price: number | null;
-  guest_id: number | null;
-  cabin_id: number | null;
+  start_date: string;
+  end_date: string;
+  num_nights: number;
+  num_guests: number;
+  total_price: number;
+  guest_id: number;
+  cabin_id: number;
   cabins: {
-    name: string | null;
-    image: string | null;
-  } | null;
+    name: string;
+    image: string;
+  };
 }
