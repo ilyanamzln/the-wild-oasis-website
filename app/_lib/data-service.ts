@@ -6,7 +6,7 @@ import { BookingsPick, CabinPrice, CabinPick } from "./types";
 /////////////
 // GET
 
-export async function getCabin(id: string) {
+export async function getCabin(id: string | number) {
   const { data, error } = await supabase
     .from("cabins")
     .select("*")
@@ -182,23 +182,5 @@ export async function createBooking(newBooking: Tables<"bookings">) {
     throw new Error("Booking could not be created");
   }
 
-  return data;
-}
-
-/////////////
-// UPDATE
-
-export async function updateBooking(id: string, updatedFields) {
-  const { data, error } = await supabase
-    .from("bookings")
-    .update(updatedFields)
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) {
-    console.error(error);
-    throw new Error("Booking could not be updated");
-  }
   return data;
 }
