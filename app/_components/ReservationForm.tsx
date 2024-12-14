@@ -1,7 +1,11 @@
 "use client";
 
+import { differenceInDays } from "date-fns";
 import { User } from "next-auth";
+import { useReservation } from "../_contexts/ReservationContext";
+import { createReservation } from "../_lib/actions";
 import { Tables } from "../_lib/database.types";
+import SubmitButton from "./SubmitButton";
 
 function ReservationForm({
   cabin,
@@ -10,7 +14,36 @@ function ReservationForm({
   cabin: Tables<"cabins">;
   user: User;
 }) {
-  const { max_capacity: maxCapacity } = cabin;
+  const { range, resetRange } = useReservation();
+  const {
+    max_capacity: maxCapacity,
+    regular_price: regularPrice,
+    discount,
+    id,
+  } = cabin;
+
+  const startDate = range?.from;
+  const endDate = range?.to;
+
+  let reservationData;
+
+  if (startDate && endDate) {
+    const numNights = differenceInDays(endDate, startDate);
+    const cabinPrice = numNights * (regularPrice ?? 0 - (discount ?? 0));
+
+    reservationData = {
+      start_date: startDate,
+      end_date: endDate,
+      num_nights: numNights,
+      cabin_price: cabinPrice,
+      cabin_id: id,
+    };
+  }
+
+  const createReservationWithData = createReservation.bind(
+    null,
+    reservationData,
+  );
 
   return (
     <div className="scale-[1.01]">
@@ -29,12 +62,18 @@ function ReservationForm({
         </div>
       </div>
 
-      <form className="flex flex-col gap-5 bg-primary-900 px-16 py-10 text-lg">
+      <form
+        action={async (formData) => {
+          await createReservationWithData(formData);
+          resetRange();
+        }}
+        className="flex flex-col gap-5 bg-primary-900 px-16 py-10 text-lg"
+      >
         <div className="space-y-2">
           <label htmlFor="numGuests">How many guests?</label>
           <select
-            name="numGuests"
-            id="numGuests"
+            name="num_guests"
+            id="num_guests"
             className="w-full rounded-sm bg-primary-200 px-5 py-3 text-primary-800 shadow-sm"
             required
           >
@@ -62,11 +101,13 @@ function ReservationForm({
         </div>
 
         <div className="flex items-center justify-end gap-6">
-          <p className="text-base text-primary-300">Start by selecting dates</p>
-
-          <button className="bg-accent-500 px-8 py-4 font-semibold text-primary-800 transition-all hover:bg-accent-600 disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300">
-            Reserve now
-          </button>
+          {!(startDate && endDate) ? (
+            <p className="text-base text-primary-300">
+              Start by selecting dates
+            </p>
+          ) : (
+            <SubmitButton pendingLabel="Reserving...">Reserve now</SubmitButton>
+          )}
         </div>
       </form>
     </div>

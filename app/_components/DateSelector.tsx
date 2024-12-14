@@ -1,15 +1,15 @@
 "use client";
 
-import { isWithinInterval } from "date-fns";
+import { differenceInDays, isWithinInterval } from "date-fns";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useReservation } from "../_contexts/ReservationContext";
 import { Tables } from "../_lib/database.types";
 
-function isAlreadyBooked(range: DateRange, datesArr: Date[]) {
+function isAlreadyBooked(range: DateRange | undefined, datesArr: Date[]) {
   return (
-    range.from &&
-    range.to &&
+    range?.from &&
+    range?.to &&
     datesArr.some((date) =>
       isWithinInterval(date, { start: range.from!, end: range.to! }),
     )
@@ -26,10 +26,20 @@ function DateSelector({
   cabin: Tables<"cabins">;
 }) {
   const { range, setRange, resetRange } = useReservation();
-  const regularPrice = 23;
-  const discount = 23;
-  const numNights = 23;
-  const cabinPrice = 23;
+
+  const displayRange: DateRange | undefined = isAlreadyBooked(
+    range,
+    bookedDates,
+  )
+    ? undefined
+    : range;
+
+  const { regular_price: regularPrice, discount } = cabin;
+  const numNights =
+    displayRange?.to && displayRange?.from
+      ? differenceInDays(displayRange?.to, displayRange?.from)
+      : 0;
+  const cabinPrice = numNights * (regularPrice! - discount!);
 
   const {
     max_booking_length: maxBookingLength,
@@ -45,12 +55,12 @@ function DateSelector({
         className="place-self-center pt-12"
         mode="range"
         onSelect={setRange}
-        selected={range}
+        selected={displayRange}
         min={minBookingLength! + 1}
         max={maxBookingLength!}
         startMonth={new Date(currentYear, monthIndex)}
         endMonth={new Date(currentYear + 5, 11)}
-        disabled={[{ before: new Date() }]}
+        disabled={[{ before: new Date() }, ...bookedDates]}
         captionLayout="dropdown"
         numberOfMonths={2}
       />
@@ -58,9 +68,9 @@ function DateSelector({
       <div className="flex h-[72px] items-center justify-between bg-accent-500 px-8 text-primary-800">
         <div className="flex items-baseline gap-6">
           <p className="flex items-baseline gap-2">
-            {discount > 0 ? (
+            {discount! > 0 ? (
               <>
-                <span className="text-2xl">${regularPrice - discount}</span>
+                <span className="text-2xl">${regularPrice! - discount!}</span>
                 <span className="font-semibold text-primary-700 line-through">
                   ${regularPrice}
                 </span>

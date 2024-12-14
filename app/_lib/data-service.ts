@@ -1,7 +1,6 @@
 import { eachDayOfInterval } from "date-fns";
 import { supabase } from "./supabase";
-import { Tables } from "./database.types";
-import { BookingsPick, CabinPrice, CabinPick } from "./types";
+import { BookingsPick, CabinPick, CabinPrice } from "./types";
 
 /////////////
 // GET
@@ -164,22 +163,6 @@ export async function createGuest(newGuest: {
   if (error) {
     console.error(error);
     throw new Error("Guest could not be created");
-  }
-
-  return data;
-}
-
-export async function createBooking(newBooking: Tables<"bookings">) {
-  const { data, error } = await supabase
-    .from("bookings")
-    .insert([newBooking])
-    // So that the newly created object gets returned!
-    .select()
-    .single();
-
-  if (error) {
-    console.error(error);
-    throw new Error("Booking could not be created");
   }
 
   return data;

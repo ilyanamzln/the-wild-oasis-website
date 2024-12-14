@@ -1,10 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth, signIn, signOut } from "./auth";
-import { supabase } from "./supabase";
-import { getBookings } from "./data-service";
 import { redirect } from "next/navigation";
+import { auth, signIn, signOut } from "./auth";
+import { getBookings } from "./data-service";
+import { Tables } from "./database.types";
+import { supabase } from "./supabase";
 
 export async function updateGuest(formData: FormData) {
   // 1. Authentication
@@ -38,6 +39,45 @@ export async function updateGuest(formData: FormData) {
 
   // 6. Revalidate
   revalidatePath("/account/profile");
+}
+
+export async function createReservation(
+  bookingData: Tables<"bookings">,
+  formData: FormData,
+) {
+  // 1. Authentication
+  const session = await auth();
+  if (!session) throw new Error("You must be logged in");
+
+  // 2. Building update data
+  const newBooking: Tables<"bookings"> = {
+    ...bookingData,
+    guest_id: session.user.guestId || null,
+    num_guests: +(formData.get("num_guests") ?? 0),
+    observations:
+      formData.get("observations")?.toString().slice(0, 1000) || null,
+    extra_price: 0,
+    total_price: bookingData?.cabin_price ?? 0,
+    is_paid: false,
+    has_breakfast: false,
+    status: "unconfirmed",
+  };
+  console.log(newBooking);
+
+  // 3. Mutation
+  const { error } = await supabase.from("bookings").insert([newBooking]);
+
+  // 4. Error handling
+  if (error) {
+    console.error(error);
+    throw new Error("Booking could not be created");
+  }
+
+  // 5. Revalidation
+  revalidatePath(`/cabins/${bookingData?.cabin_id}`);
+
+  // 6. Redirect
+  redirect("/cabins/thank-you");
 }
 
 export async function updateReservation(formData: FormData) {
