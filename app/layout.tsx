@@ -1,12 +1,13 @@
 import Header from "./_components/Header";
 
-import { Josefin_Sans } from "next/font/google";
-const josefin = Josefin_Sans({
+import { Albert_Sans } from "next/font/google";
+const albert = Albert_Sans({
   subsets: ["latin"],
   display: "swap",
 });
 
 import "@/app/_styles/globals.css";
+import { ReservationProvider } from "./_contexts/ReservationContext";
 
 export const metadata = {
   title: {
@@ -25,11 +26,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={` ${josefin.className} relative flex min-h-screen flex-col bg-primary-950 text-primary-100 antialiased`}
+        className={` ${albert.className} relative flex min-h-screen flex-col bg-primary-950 text-primary-100 antialiased`}
       >
         <Header />
         <div className="grid flex-1 px-8 py-12">
-          <main className="mx-auto w-full max-w-7xl">{children}</main>
+          <main className="mx-auto w-full max-w-7xl">
+            <ReservationProvider>{children}</ReservationProvider>
+          </main>
         </div>
       </body>
     </html>

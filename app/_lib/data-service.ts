@@ -1,12 +1,11 @@
 import { eachDayOfInterval } from "date-fns";
 import { supabase } from "./supabase";
-import { Tables } from "./database.types";
-import { BookingsPick, CabinPrice, CabinPick } from "./types";
+import { BookingsPick, CabinPick, CabinPrice } from "./types";
 
 /////////////
 // GET
 
-export async function getCabin(id: string) {
+export async function getCabin(id: string | number) {
   const { data, error } = await supabase
     .from("cabins")
     .select("*")
@@ -80,15 +79,15 @@ export async function getBooking(id: string) {
   return data;
 }
 
-export async function getBookings(guestId: string) {
+export async function getBookings(guestId: number) {
   const { data, error, count } = await supabase
     .from("bookings")
     // We actually also need data on the cabins as well. But let's ONLY take the data that we actually need, in order to reduce downloaded data.
     .select(
       "id, created_at, start_date, end_date, num_nights, num_guests, total_price, guest_id, cabin_id, cabins(name, image)",
     )
-    .eq("guestId", guestId)
-    .order("startDate")
+    .eq("guest_id", guestId)
+    .order("start_date")
     .returns<BookingsPick[]>();
 
   if (error) {
@@ -99,7 +98,7 @@ export async function getBookings(guestId: string) {
   return data;
 }
 
-export async function getBookedDatesByCabinId(cabinId: string) {
+export async function getBookedDatesByCabinId(cabinId: number) {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
   const date = today.toISOString();
@@ -155,7 +154,10 @@ export async function getCountries() {
 /////////////
 // CREATE
 
-export async function createGuest(newGuest: Tables<"guests">) {
+export async function createGuest(newGuest: {
+  email: string;
+  full_name: string;
+}) {
   const { data, error } = await supabase.from("guests").insert([newGuest]);
 
   if (error) {
@@ -163,68 +165,5 @@ export async function createGuest(newGuest: Tables<"guests">) {
     throw new Error("Guest could not be created");
   }
 
-  return data;
-}
-
-export async function createBooking(newBooking: Tables<"bookings">) {
-  const { data, error } = await supabase
-    .from("bookings")
-    .insert([newBooking])
-    // So that the newly created object gets returned!
-    .select()
-    .single();
-
-  if (error) {
-    console.error(error);
-    throw new Error("Booking could not be created");
-  }
-
-  return data;
-}
-
-/////////////
-// UPDATE
-
-// The updatedFields is an object which should ONLY contain the updated data
-export async function updateGuest(id: string, updatedFields) {
-  const { data, error } = await supabase
-    .from("guests")
-    .update(updatedFields)
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) {
-    console.error(error);
-    throw new Error("Guest could not be updated");
-  }
-  return data;
-}
-
-export async function updateBooking(id: string, updatedFields) {
-  const { data, error } = await supabase
-    .from("bookings")
-    .update(updatedFields)
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) {
-    console.error(error);
-    throw new Error("Booking could not be updated");
-  }
-  return data;
-}
-
-/////////////
-// DELETE
-
-export async function deleteBooking(id: string) {
-  const { data, error } = await supabase.from("bookings").delete().eq("id", id);
-
-  if (error) {
-    console.error(error);
-    throw new Error("Booking could not be deleted");
-  }
   return data;
 }

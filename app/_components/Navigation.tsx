@@ -1,4 +1,5 @@
 import Link from "next/link";
+import UserAVatar from "./UserAvatar";
 
 export default function Navigation() {
   return (
@@ -21,12 +22,7 @@ export default function Navigation() {
           </Link>
         </li>
         <li>
-          <Link
-            href="/account"
-            className="transition-colors hover:text-accent-400"
-          >
-            Guest area
-          </Link>
+          <UserAVatar />
         </li>
       </ul>
     </nav>
